@@ -4,9 +4,19 @@
     <select id="findAll" resultType="Kitchen">
         select * from kitchen
     </select>
+
+    <select id="findAllAlarm" resultType="Kitchen">
+        select * from kitchen WHERE id IN (select DISTINCT id from alarm)
+    </select>
+    <select id="findAllNoAlarm" resultType="Kitchen">
+        select * from kitchen WHERE id NOT IN (select DISTINCT id from alarm)
+    </select>
     
     <select id="findById" parameterType="java.lang.Long" resultType="Kitchen">
         select * from kitchen where id=#{id}
+    </select>
+    <select id="findByName" parameterType="java.lang.String" resultType="Kitchen">
+        select * from kitchen where name=#{name}
     </select>
 
     <insert id="save" parameterType="Kitchen">

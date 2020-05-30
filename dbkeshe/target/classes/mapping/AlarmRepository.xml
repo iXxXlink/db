@@ -9,6 +9,8 @@
         select * from alarm where alarmid=#{alarmid}
     </select>
 
+
+
     <insert id="save" parameterType="Alarm">
         insert into alarm(id,datetime,type,picURL) values (#{id},#{datetime},#{type},#{picURL})
     </insert>

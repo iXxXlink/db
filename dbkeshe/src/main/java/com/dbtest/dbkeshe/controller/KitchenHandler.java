@@ -1,5 +1,6 @@
 package com.dbtest.dbkeshe.controller;
 
+import com.dbtest.dbkeshe.entity.HistoryVideo;
 import com.dbtest.dbkeshe.entity.Kitchen;
 import com.dbtest.dbkeshe.repository.KitchenRepository;
 
@@ -42,7 +43,23 @@ public class KitchenHandler {
     }
 
 
+    @PostMapping("/findByName")
+    public Kitchen findByName(@RequestParam(value = "name",required = false) String name){
+        return kitchenRepository.findByName(name);
+    }
 
+    @PostMapping("/findHege")
+    public List<Kitchen> findByAlarm(@RequestParam(value = "status",required = false) String status){
+        if(status.equals("不合格")){
+            return kitchenRepository.findAllAlarm();
+        }else if(status.equals("合格")){
+            return kitchenRepository.findAllNoAlarm();
+        }
+        else {
+            return null;
+        }
+
+    }
 
 
 

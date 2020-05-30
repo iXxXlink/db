@@ -1,4 +1,11 @@
 package com.dbtest.dbkeshe.entity;
 
-public class logs {
+import lombok.Data;
+
+@Data
+public class Logs {
+    private  String username;
+    private  Long videoId;
+    private Long id;
+
 }

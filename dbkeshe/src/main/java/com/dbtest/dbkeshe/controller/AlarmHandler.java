@@ -28,6 +28,7 @@ public class AlarmHandler {
         return alarmRepository.findById(alarmid);
     }
 
+
     @PostMapping("/save")
     public void save(@RequestBody Alarm alarm){
         alarmRepository.save(alarm);
@@ -42,8 +43,6 @@ public class AlarmHandler {
     public void deleteById(@PathVariable("alarmid") Long alarmid){
         alarmRepository.deleteById(alarmid);
     }
-
-
 
 
 
