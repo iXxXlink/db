@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dbtest.dbkeshe.repository.AlarmRepository">
+    <select id="findAll" resultType="Alarm">
+        select * from alarm
+    </select>
+
+    <select id="findById" parameterType="java.lang.Long" resultType="Alarm">
+        select * from alarm where alarmid=#{alarmid}
+    </select>
+
+    <insert id="save" parameterType="Alarm">
+        insert into alarm(id,datetime,type,picURL) values (#{id},#{datetime},#{type},#{picURL})
+    </insert>
+
+    <update id="update" parameterType="Alarm">
+        update alarm set id=#{id},datetime=#{datetime},type=#{type},picURL=#{picURL} where alarmid=#{alarmid}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        delete from alarm where alarmid=#{alarmid}
+    </delete>
+</mapper>
