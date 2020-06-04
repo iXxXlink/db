@@ -6,12 +6,14 @@ import com.dbtest.dbkeshe.entity.User;
 
 import com.dbtest.dbkeshe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
-@RestController
+//@RestController
+@Controller
 @RequestMapping("/user")
 public class UserHandler{
 
@@ -19,6 +21,7 @@ public class UserHandler{
     private UserRepository userRepository;
 
     @PutMapping("/register")
+    @ResponseBody
     public String register(@RequestBody User user){
         User flag=userRepository.findByName(user.getUsername());
         if(flag==null){
@@ -31,7 +34,8 @@ public class UserHandler{
 
     }
 
-    @PutMapping("/login")
+    @PostMapping("/login")
+    @ResponseBody
     public String login(@RequestBody User user){
         User flag=userRepository.check(user);
         if(flag==null){

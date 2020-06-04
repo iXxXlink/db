@@ -15,7 +15,7 @@
     <select id="findById" parameterType="java.lang.Long" resultType="Kitchen">
         select * from kitchen where id=#{id}
     </select>
-    <select id="findByName" parameterType="java.lang.String" resultType="Kitchen">
+    <select id="findByName" parameterType="java.lang.String" resultType="com.dbtest.dbkeshe.entity.Kitchen">
         select * from kitchen where name=#{name}
     </select>
 
@@ -26,6 +26,8 @@
     <update id="update" parameterType="Kitchen">
         update kitchen set name=#{name},location=#{location} where id=#{id}
     </update>
+
+
 
     <delete id="deleteById" parameterType="java.lang.Long">
         delete from kitchen where id=#{id}

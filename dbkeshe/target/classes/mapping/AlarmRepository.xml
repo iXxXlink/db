@@ -1,21 +1,48 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dbtest.dbkeshe.repository.AlarmRepository">
-    <select id="findAll" resultType="Alarm">
-        select * from alarm
+    <select id="findAll" resultMap="alarmEntity">
+        select * from alarm,kitchen
+        where alarm.id=kitchen.id
+        order by alarm.datetime
     </select>
 
-    <select id="findById" parameterType="java.lang.Long" resultType="Alarm">
+    <resultMap id="alarmEntity" type="AlarmInfo">
+        <id property="alarmid" column="alarmid"></id>
+        <result property="id" column="id"></result>
+        <result property="datetime" column="datetime"></result>
+        <result property="type" column="type"></result>
+        <result property="picURL" column="picURL"></result>
+        <association property="kitchen" javaType="com.dbtest.dbkeshe.entity.Kitchen">
+            <id property="id" column="id"></id>
+            <result property="name" column="name"></result>
+            <result property="location" column="location"></result>
+        </association>
+    </resultMap>
+
+    <select id="findById" parameterType="java.lang.Long" resultType="com.dbtest.dbkeshe.entity.Alarm">
         select * from alarm where alarmid=#{alarmid}
     </select>
 
 
 
-    <insert id="save" parameterType="Alarm">
+    <select id="findByKitchen" parameterType="java.lang.Long" resultType="com.dbtest.dbkeshe.entity.Alarm">
+        select * from alarm where id = #{id}
+    </select>
+    <select id="findByKitchenAndDate" parameterType="com.dbtest.dbkeshe.entity.AlarmLimtedQuery" resultType="com.dbtest.dbkeshe.entity.Alarm">
+        select * from alarm where id = #{id}
+        and (datetime between #{dateFrom} and #{dateTo})
+    </select>
+
+    <select id="count" resultType="int">
+        select count(*)
+    </select>
+
+    <insert id="save" parameterType="com.dbtest.dbkeshe.entity.Alarm">
         insert into alarm(id,datetime,type,picURL) values (#{id},#{datetime},#{type},#{picURL})
     </insert>
 
-    <update id="update" parameterType="Alarm">
+    <update id="update" parameterType="com.dbtest.dbkeshe.entity.Alarm">
         update alarm set id=#{id},datetime=#{datetime},type=#{type},picURL=#{picURL} where alarmid=#{alarmid}
     </update>
 

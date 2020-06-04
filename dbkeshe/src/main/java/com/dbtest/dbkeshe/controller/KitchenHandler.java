@@ -5,19 +5,31 @@ import com.dbtest.dbkeshe.entity.Kitchen;
 import com.dbtest.dbkeshe.repository.KitchenRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
 import java.util.List;
+import java.util.Map;
 
 
-@RestController
+//@RestController
+@Controller
 @RequestMapping("/kitchen")
 public class KitchenHandler {
 
     @Autowired
     private KitchenRepository kitchenRepository;
 
+    @GetMapping("/")
+    @ResponseBody
+    public String test(){
+        return "你好";
+    }
+
+
     @GetMapping("/findAll")
+    @ResponseBody
     public List<Kitchen> findAll(){
         return kitchenRepository.findAll();
     }
@@ -44,8 +56,11 @@ public class KitchenHandler {
 
 
     @PostMapping("/findByName")
-    public Kitchen findByName(@RequestParam(value = "name",required = false) String name){
-        return kitchenRepository.findByName(name);
+    @ResponseBody
+    public Kitchen findByName(@RequestBody Map kName){
+        String name = (String) kName.get("name");
+        Kitchen k=kitchenRepository.findByName(name);
+        return k;
     }
 
     @PostMapping("/findHege")

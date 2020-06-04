@@ -2,18 +2,33 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dbtest.dbkeshe.repository.HistoryVideoRepository">
     <insert id="save" parameterType="HistoryVideo">
-        insert into historyvideo(id,videoURL,date) values (#{id},#{video},#{date})
+        insert into historyvideo(id,videoURL,date) values (#{id},#{videoURL},#{date})
     </insert>
 
     <select id="findById" parameterType="java.lang.Long" resultType="HistoryVideo">
         select * from historyvideo where id=#{id}
     </select>
+    <select id="findByIdAndDate" parameterType="com.dbtest.dbkeshe.entity.VideoLimtedQuery" resultType="HistoryVideo">
+        select * from historyvideo where id=#{id}
+        and date between #{dateFrom} and #{dateTo}
+    </select>
 
     <select id="findByVideoId" parameterType="java.lang.Long" resultType="HistoryVideo">
         select * from historyvideo where videoid=#{videoId}
     </select>
+
     <select id="findAll" resultType="HistoryVideo">
-        select * from historyvideo
+        select * from historyvideo as h,kitchen as k
+        where h.id = k.id
     </select>
+
+    <delete id="deleteByVideoId" parameterType="java.lang.Long">
+        delete from historyvideo where videoid=#{videoId}
+    </delete>
+
+    <update id="changeURL" parameterType="com.dbtest.dbkeshe.entity.HistoryVideo">
+        update historyvideo set videoURL=#{videoURL}
+        where videoid=#{videoId}
+    </update>
 
 </mapper>
