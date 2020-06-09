@@ -2,10 +2,11 @@ package com.dbtest.dbkeshe.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class Logs {
-    private  String username;
-    private  Long videoId;
-    private Long id;
-
+    Date currentTime;
+    String username;
+    String details;
 }

@@ -15,7 +15,18 @@
                         class="handle-del mr10"
                         @click="delAllSelection"
                 >批量删除</el-button>
-
+                <el-switch
+                        v-model="value1"
+                        active-text="日期↑"
+                        inactive-text="日期↓"
+                        style="width: 200px">
+                </el-switch>
+                <el-switch
+                        v-model="value1"
+                        inactive-text="不分组"
+                        active-text="按餐馆分组"
+                        style="width: 200px">
+                </el-switch>
 
             </div>
 
@@ -61,10 +72,11 @@
     export default {
         data() {
             return {
+                user:localStorage.getItem("ms_username"),
                 kName:"",
                 query: {
                     pageIndex: 1,
-                    pageSize: 10
+                    pageSize: 2
                 },
                 tableData: [],
                 multipleSelection: [],
@@ -78,16 +90,24 @@
         },
         created() {
             this.getData();
-
+            this.getPage();
         },
         methods: {
-
+            //获取总条数
+            getPage(){
+                axios.get("http://localhost:8181/alarm/count")
+                    .then(response=>(this.pageTotal= response.data))
+                    .catch(function (error) {
+                        this.logAction(error);
+                    })
+            },
             // 获取数据
             getData() {
                 axios.get("http://localhost:8181/alarm/findAll",{params:this.query})
-                    .then(response=>(this.tableData=response.data,this.pageTotal=response.data.length))
+                    .then(response=>(this.tableData=response.data))
                     .catch(function (error) {
                         console.log(error);
+                        this.logAction(error);
                     });
             },
 
@@ -109,6 +129,12 @@
             handlePageChange(val) {
                 this.query.pageIndex=val;
                 this.getData();
+            },
+            logAction(action){
+                axios.post("http://localhost:8181/logs/save",{username:localStorage.getItem("ms_username"),details:action})
+                .catch(function (e) {
+                    console.log(e)
+                })
             }
         }
     };

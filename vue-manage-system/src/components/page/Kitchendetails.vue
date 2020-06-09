@@ -40,7 +40,7 @@
                             <div class="grid-content grid-con-1">
                                 <i class="el-icon-lx-people grid-con-icon"></i>
                                 <div class="grid-cont-right">
-                                    <div class="grid-num">{{countVideos}}</div>
+                                    <div class="grid-num">{{videoQuery.pageTotal}}</div>
                                     <div>餐厅历史视频数量</div>
                                 </div>
                             </div>
@@ -51,7 +51,7 @@
                             <div class="grid-content grid-con-3">
                                 <i class="el-icon-lx-goods grid-con-icon"></i>
                                 <div class="grid-cont-right">
-                                    <div class="grid-num">{{countAlarms}}</div>
+                                    <div class="grid-num">{{alarmQuery.pageTotal}}</div>
                                     <div>违规记录</div>
                                 </div>
                             </div>
@@ -61,9 +61,9 @@
                 <el-card shadow="hover" style="height:403px;" v-if="seeDetails.alarm">
                     <div slot="header" class="clearfix">
                         <span>违规记录</span>
-                        <el-button style="float: right; padding: 3px 0" type="text">添加</el-button>
+                        <el-button style="float: right; padding: 3px 0" type="text" @click="showAddAlarmV">添加</el-button>
                     </div>
-                    <el-table :show-header="true" :data="alarmData" style="width:100%;">
+                    <el-table :show-header="true" :data="alarmData.slice((alarmQuery.pageIndex-1)*alarmQuery.pageSize,(alarmQuery.pageIndex)*alarmQuery.pageSize,)" style="width:100%;">
                         <el-table-column prop="type" label="类型"  ></el-table-column>
                         <el-table-column prop="datetime" label="时间"></el-table-column>
                         <el-table-column label="截图地址"  >
@@ -86,12 +86,12 @@
             </el-col>
         </el-row>
         <el-row :gutter="20" v-if="seeDetails.video">
-            <el-card shadow="hover" style="height:403px;">
+            <el-card shadow="hover" style="height:600px;">
                 <div slot="header" class="clearfix">
                     <span>历史视频</span>
-                    <el-button style="float: right; padding: 3px 0" type="text">添加</el-button>
+                    <el-button style="float: right; padding: 3px 0" type="text" @click="showAddVideoV">添加</el-button>
                 </div>
-                <el-table :show-header="true" :data="videoData" style="width:100%;">
+                <el-table :show-header="true" :data="videoData.slice((videoQuery.pageIndex-1)*videoQuery.pageSize,(videoQuery.pageIndex)*videoQuery.pageSize,)" style="width:100%;">
                     <el-table-column prop="videoId" label="视频Id"  ></el-table-column>
                     <el-table-column prop="date" label="时间Date"></el-table-column>
                     <el-table-column label="视频地址"  >
@@ -126,21 +126,63 @@
                             @current-change="handlePageChange2"
                     ></el-pagination>
                 </div>
-                <!-- 编辑弹出框 -->
-                <el-dialog title="编辑" :visible.sync="editVisible" width="30%">
-                    <el-form ref="form" :model="form" label-width="70px">
-                        <el-form-item label="视频地址">
-                            <el-input v-model="form.videoURL"></el-input>
-                        </el-form-item>
-                    </el-form>
-                    <span slot="footer" class="dialog-footer">
+            </el-card>
+
+        </el-row>
+        <el-dialog title="编辑" :visible.sync="editVisible" width="30%">
+            <el-form ref="form" :model="form" label-width="70px">
+                <el-form-item label="视频地址">
+                    <el-input v-model="tmpURL"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
                 <el-button type="primary" @click="saveEdit">确 定</el-button>
             </span>
-                </el-dialog>
-            </el-card>
-        </el-row>
-
+        </el-dialog>
+        <el-dialog title="添加视频" :visible.sync="showAddVideo" width="50%">
+            <el-form ref="addVideoForm" :model="addVideoForm" label-width="70px">
+                <el-form-item label="视频url">
+                    <el-input v-model="addVideoForm.videoURL"></el-input>
+                </el-form-item>
+                <el-form-item label="视频日期">
+                    <el-date-picker
+                            type="date"
+                            placeholder="Date"
+                            v-model="addVideoForm.date"
+                            value-format="yyyy-MM-dd"
+                            style="width: 100%;"
+                    ></el-date-picker>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="showAddVideo= false">取 消</el-button>
+                <el-button type="primary" @click="saveAddVideo">确 定</el-button>
+            </span>
+        </el-dialog>
+        <el-dialog title="添加违规记录" :visible.sync="showAddAlarm" width="50%">
+            <el-form ref="addAlarmForm" :model="addAlarmForm" label-width="70px">
+                <el-form-item label="违规类型">
+                    <el-input v-model="addAlarmForm.type"></el-input>
+                </el-form-item>
+                <el-form-item label="截图url">
+                    <el-input v-model="addAlarmForm.picURL"></el-input>
+                </el-form-item>
+                <el-form-item label="日期">
+                    <el-date-picker
+                            type="date"
+                            placeholder="Date"
+                            v-model="addAlarmForm.datetime"
+                            value-format="yyyy-MM-dd"
+                            style="width: 100%;"
+                    ></el-date-picker>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="showAddAlarm= false">取 消</el-button>
+                <el-button type="primary" @click="saveAddAlarm">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -152,13 +194,12 @@
 
         data() {
             return {
+                user:localStorage.getItem("ms_username"),
                 seeDetails:{
                     base:this.$route.params.base,
                     alarm:this.$route.params.alarm,
                     video:this.$route.params.video,
                 },
-                countVideos:0,
-                countAlarms:0,
                 baseData:{
                     name: this.$route.params.name,
                     add:"霸王路",
@@ -176,18 +217,20 @@
                 }],
                 alarmQuery:{
                     pageIndex: 1,
-                    pageSize: 10,
+                    pageSize: 3,
                     pageTotal:5
                 },
                 videoQuery:{
                     pageIndex: 1,
-                    pageSize: 10,
-                    pageTotal:5
+                    pageSize: 5,
+                    pageTotal:5,
                 },
                 form:{
-                    videoURL:"",
+                },
+                tmpURL:"",
+                table2:{
+                    row:0,
                     idx:0,
-                    row:{}
                 },
                 changeAdd:{
                     location:"",
@@ -199,6 +242,19 @@
                     dateFrom:this.$route.params.dateFrom,
                     dateTo:this.$route.params.dateTo,
                 },
+                showAddVideo:false,
+                showAddAlarm:false,
+                addVideoForm:{
+                    id:null,
+                    videoURL:"",
+                    date:"",
+                },
+                addAlarmForm:{
+                    id:null,
+                    picURL:"",
+                    datetime:"",
+                    type:"",
+                }
             };
         },
         computed: {
@@ -221,6 +277,14 @@
             this.getData();
         },
         methods: {
+            showAddVideoV(){
+                this.showAddVideo=true;
+                this.addVideoForm.id=this.baseData.id+"";
+            },
+            showAddAlarmV(){
+                this.showAddAlarm=true;
+                this.addAlarmForm.id=this.baseData.id+"";
+            },
             getData(){
                 //情况一：未限定时间范围
                 if(!this.$route.params.useDate){
@@ -229,20 +293,23 @@
                         .then(response=>{this.baseData.add=response.data.location,this.baseData.id=response.data.id,
                             //获取违规信息（嵌套实现同步）
                             axios.get("http://localhost:8181/alarm/findByKitchen",{params:{id:this.baseData.id}})
-                                .then(response2=>(this.alarmData=response2.data,this.countAlarms=this.alarmData.length,this.alarmQuery.pageTotal= Math.ceil(this.countAlarms/this.alarmQuery.pageSize)))
+                                .then(response2=>(this.alarmData=response2.data,this.alarmQuery.pageTotal=response2.data.length))
                                 .catch(function (error) {
                                     console.log(error);
+                                    this.logAction(error);
                                     this.$router.push("/kitchenquery");
                                 })})
                         .catch(function (err) {
                             console.log(err);
+                            this.logAction(error);
                             this.$router.push("/kitchenquery");
                         });
                     //获取视频信息
                     axios.post("http://localhost:8181/historyvideo/findByName",{kName:this.baseData.name})
-                        .then(response=>(this.videoData=response.data,this.countVideos=this.videoData.length,this.videoQuery.pageTotal= Math.ceil(this.countVideos/this.videoQuery.pageSize)))
+                        .then(response=>(this.videoData=response.data,this.videoQuery.pageTotal=this.videoData.length))
                         .catch(function (error) {
                             console.log(error);
+                            this.logAction(error);
                             this.$router.push("/kitchenquery");
                         });
 
@@ -252,19 +319,22 @@
                         .then(response=>{this.baseData.add=response.data.location,this.baseData.id=response.data.id,
                             //获取违规信息（嵌套实现同步）
                             axios.post("http://localhost:8181/alarm/findByKitchenAndDate",{id:this.baseData.id,dateFrom:this.dateChange.dateFrom,dateTo:this.dateChange.dateTo})
-                                .then(response2=>(this.alarmData=response2.data,this.countAlarms=this.alarmData.length,this.alarmQuery.pageTotal= Math.ceil(this.countAlarms/this.alarmQuery.pageSize)))
+                                .then(response2=>(this.alarmData=response2.data,this.alarmQuery.pageTotal= response2.data.length))
                                 .catch(function (error) {
                                     console.log(error);
+                                    this.logAction(error);
                                     this.$router.push("/kitchenquery");
                                 }),//获取视频信息
                             axios.post("http://localhost:8181/historyvideo/findByIdAndDate",{id:this.baseData.id,dateFrom:this.dateChange.dateFrom,dateTo:this.dateChange.dateTo})
-                                .then(response3=>(this.videoData=response3.data,this.countVideos=this.videoData.length,this.videoQuery.pageTotal= Math.ceil(this.countVideos/this.videoQuery.pageSize)))
+                                .then(response3=>(this.videoData=response3.data,this.videoQuery.pageTotal= response3.data.length))
                                 .catch(function (error) {
                                     console.log(error);
+                                    this.logAction(error);
                                     this.$router.push("/kitchenquery");
                                 })})
                         .catch(function (err) {
                             console.log(err);
+                            this.logAction(err);
                             this.$router.push("/kitchenquery");
                         });
                     // //获取视频信息
@@ -279,6 +349,9 @@
                 }
 
             },
+            getPage(){
+
+            },
             handlePageChange1(val){
                 this.alarmQuery.pageIndex=val;
                 this.created();
@@ -289,26 +362,88 @@
             },
             handleEdit(index,row){
                 this.editVisible = true;
-                this.form.row=row;
-                this.form.idx=index;
+                this.table2.row=row;
+                this.table2.idx=index;
             },
             handleDelete(index,row){
-
-
+                axios.get("http://localhost:8181/historyvideo/deleteByVideoId",{params:{videoId:row.videoId}})
+                    .then(response=>{
+                        if(response.data===1){
+                            this.$message.success('删除成功');
+                            this.videoData.splice(index, 1);
+                            this.getData();
+                            this.logAction("删除了video:"+row.videoId);
+                        }else {
+                            this.$message.error("删除失败");
+                        }
+                    }).catch(function (err) {
+                    console.log(err);
+                    this.logAction(err);
+                });
             },
             saveEdit(){
+                axios.post("http://localhost:8181/historyvideo/changeURL",{videoId:this.table2.row.videoId,videoURL:this.table2.row.videoURL})
+                    .then(response=>{
+                        if(response.data===1){
+                            this.table2.row.videoURL=this.tmpURL;
+                            this.$message.success(`修改第 ${this.table2.idx + 1} 行成功`);
+                            this.$set(this.videoData, this.table2.idx, this.table2.row);
+                            this.logAction("修改了video："+this.table2.row.videoId+"的视频地址");
+                        }
+                        else{
+                            this.$message.success(`修改失败`);
+                        }
+                    })
+                    .catch(function (err) {
+                    this.logAction(err);
+                    })
                 this.editVisible = false;
-                this.$message.success(`修改第 ${this.form.idx + 1} 行成功`);
-                this.form.row.videoURL=this.form.videoURL;
-                this.$set(this.videoData, this.form.idx, this.form.row);
+
+            },
+            saveAddVideo(){
+                this.showAddVideo=false;
+                axios.put("http://localhost:8181/historyvideo/save",this.addVideoForm)
+                    .then(response=>{
+                        if(response.data===1){
+                            this.$message.success("添加成功！");
+                            this.getData();
+                            this.logAction("给"+this.baseData.name+"添加了video");
+                        }else{
+                            this.$message.error("添加失败");
+                        }
+                    })
+
+            },
+            saveAddAlarm(){
+                this.showAddAlarm=false;
+                axios.post("http://localhost:8181/alarm/save",this.addAlarmForm)
+                    .then(response=>{
+                        if(response.data===1){
+                            this.$message.success("添加成功！");
+                            this.getData();
+                            this.logAction("给"+this.baseData.name+"添加了alarm");
+                        }else{
+                            this.$message.error("添加失败");
+                        }
+                    })
             },
             onSubmit(){
                 this.changeAdd.id=this.baseData.id;
                 axios.put("http://localhost:8181/kitchen/update",this.changeAdd)
-                .then(this.baseData.name=this.changeAdd.name,this.baseData.add=this.changeAdd.location)
-                .catch()
+                    .then(this.baseData.name=this.changeAdd.name,this.baseData.add=this.changeAdd.location
+                    ,this.logAction("给"+this.baseData.name+"修改了地址"))
+                    .catch(function (error) {
+                        this.logAction(error);
+                    })
+
 
             },
+            logAction(action){
+                axios.post("http://localhost:8181/logs/save",{username:localStorage.getItem("ms_username"),details:action})
+                    .catch(function (e) {
+                        console.log(e)
+                    })
+            }
         }
     };
 </script>

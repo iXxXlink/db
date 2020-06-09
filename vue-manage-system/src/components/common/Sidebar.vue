@@ -79,6 +79,11 @@ export default {
                     title:"餐厅信息"
 
                 },
+                {
+                    icon:"el-icon-lx-notice",
+                    index:"logs",
+                    title:"日志信息"
+                },
 
 
             ]

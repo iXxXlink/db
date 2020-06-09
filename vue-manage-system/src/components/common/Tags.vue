@@ -68,7 +68,8 @@
                     this.tagsList.push({
                         title: route.meta.title,
                         path: route.fullPath,
-                        name: route.matched[1].components.default.name
+                        name: route.meta.title,
+                        // route.matched[1].components.default.name
                     })
                 }
                 bus.$emit('tags', this.tagsList);
@@ -84,7 +85,11 @@
         },
         watch:{
             $route(newValue, oldValue){
+                // console.log(newValue.matched[1].components.default.name)
+                // console.log(newValue);
+                // console.log("hi");
                 this.setTags(newValue);
+
             }
         },
         created(){

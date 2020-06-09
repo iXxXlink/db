@@ -51,6 +51,20 @@ export default new Router({
                         title:"违规信息"
                     }
                 },
+                {
+                    path:"/logs",
+                    component:()=>import("../components/page/Logs"),
+                    meta:{
+                        title:"日志信息"
+                    }
+                },
+                {
+                    path:"/test",
+                    component:()=>import("../components/page/Test"),
+                    meta:{
+                        title:"测试"
+                    }
+                },
 
             ]
         },

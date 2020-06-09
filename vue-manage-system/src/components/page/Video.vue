@@ -110,11 +110,12 @@
     export default {
         data() {
             return {
+
                 showAdd:false,
                 kName:"",
                 query: {
                     pageIndex: 1,
-                    pageSize: 10
+                    pageSize: 2
                 },
                 tableData: [],
                 multipleSelection: [],
@@ -142,7 +143,7 @@
             //获得总页数
             getPage(){
                 axios.get("http://localhost:8181/historyvideo/count")
-                .then(response=>(this.pageTotal= Math.ceil(response.data/this.query.pageSize)))
+                .then(response=>(this.pageTotal= response.data-1))
             },
             // 获取数据
             getData() {
@@ -150,6 +151,7 @@
                 .then(response=>(this.tableData=response.data))
                 .catch(function (error) {
                     console.log(error);
+                    this.logAction(error);
                 });
             },
             // 触发搜索按钮
@@ -158,6 +160,7 @@
                 .then(response=>(this.tableData=response.data))
                 .catch(function (error) {
                     console.log(error);
+                    this.logAction(error);
                 });
             },
             // 删除操作
@@ -167,11 +170,13 @@
                         if(response.data===1){
                             this.$message.success('删除成功');
                             this.tableData.splice(index, 1);
+                            this.logAction("删除了video:"+row.videoId);
                         }else {
                             this.$message.error("删除失败");
                         }
                     }).catch(function (err) {
-                    console.log(err);
+                        console.log(err);
+                        this.logAction(error);
                 });
             },
             // 多选操作
@@ -202,10 +207,14 @@
                         this.form.videoURL=this.tmpURL;
                         this.$message.success(`修改第 ${this.idx + 1} 行成功`);
                         this.$set(this.tableData, this.idx, this.form);
+                        this.logAction("修改了video："+this.form.videoId+"的视频地址");
                     }
                     else{
                         this.$message.success(`修改失败`);
+
                     }
+                }).catch(function (error) {
+                    this.logAction(error);
                 })
                 this.editVisible = false;
 
@@ -217,6 +226,7 @@
                     if(response.data===1){
                         this.$message.success("添加成功！");
                         this.getData();
+                        this.logAction("添加了video");
                     }else{
                         this.$message.error("添加失败");
                     }
@@ -230,6 +240,12 @@
             },
             showAddTable(){
                 this.showAdd=true
+            },
+            logAction(action){
+                axios.post("http://localhost:8181/logs/save",{username:localStorage.getItem("ms_username"),details:action})
+                    .catch(function (e) {
+                        console.log(e)
+                    })
             }
         }
     };

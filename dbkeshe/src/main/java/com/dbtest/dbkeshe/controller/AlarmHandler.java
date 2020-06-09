@@ -43,10 +43,36 @@ public class AlarmHandler {
         return alarmRepository.findById(alarmid);
     }
 
+    @GetMapping("count")
+    @ResponseBody
+    public int count(){
+        List<AlarmInfo> list =alarmRepository.findAll();
+        System.out.println(list.size());
+        return list.size();
+    }
 
     @PostMapping("/save")
-    public void save(@RequestBody Alarm alarm){
-        alarmRepository.save(alarm);
+    @ResponseBody
+    public int save(@RequestBody Map map) throws ParseException {
+        Long id=new Long((String) map.get("id"));
+        String picURL= (String) map.get("picURL");
+        String type = (String) map.get("type");
+        String date= (String) map.get("datetime");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date datetime= simpleDateFormat.parse(date);
+        Alarm alarm = new Alarm();
+        alarm.setId(id);
+        alarm.setType(type);
+        alarm.setDatetime(datetime);
+        alarm.setPicURL(picURL);
+        try {
+            alarmRepository.save(alarm);
+            return 1;
+        }
+       catch (Exception e){
+            e.printStackTrace();
+            return 0;
+       }
     }
 
     @PutMapping("/update")
